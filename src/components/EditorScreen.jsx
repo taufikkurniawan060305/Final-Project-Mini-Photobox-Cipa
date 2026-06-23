@@ -85,6 +85,7 @@ export default function EditorScreen({ photos, onRetake }) {
     return `${yyyy}.${mm}.${dd}`;
   });
   const [isExporting, setIsExporting] = useState(false);
+  const [exportedImage, setExportedImage] = useState(null);
   const printRef = useRef(null);
 
   const handleDownload = async () => {
@@ -103,6 +104,9 @@ export default function EditorScreen({ photos, onRetake }) {
       });
       
       const dataUrl = canvas.toDataURL('image/png');
+      setExportedImage(dataUrl);
+      
+      // Attempt automatic download (works on Desktop)
       const link = document.createElement('a');
       link.download = `cipa-miniphotobox-${Date.now()}.png`;
       link.href = dataUrl;
@@ -372,7 +376,7 @@ export default function EditorScreen({ photos, onRetake }) {
 
                     {/* Symmetrical Charging Bulls Logo at Bottom Center */}
                     <div className="absolute bottom-[66px] left-1/2 -translate-x-1/2 z-20 flex items-center justify-center pointer-events-none">
-                      <svg width="76" height="34" viewBox="0 0 100 50" fill="none" className="filter drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]">
+                      <svg width="76" height="34" viewBox="0 0 100 50" fill="none">
                         <circle cx="50" cy="22" r="13" fill="#FFCC00" />
                         {/* Left Charging Bull */}
                         <path d="M 12,32 C 16,30 20,22 25,23 C 28,24 30,28 32,27 C 35,26 37,21 40,21 C 43,21 46,26 47,24 C 48,22 46,19 44,19 C 42,19 40,17 38,18 C 36,19 35,16 32,16 C 30,16 27,18 25,18 C 21,18 17,23 15,25 C 13,27 10,29 8,28 C 9,30 11,32 12,32 Z" fill="#D11933" stroke="#FFCC00" strokeWidth="0.8" strokeLinejoin="round" />
@@ -555,7 +559,9 @@ export default function EditorScreen({ photos, onRetake }) {
                   }`}
                 >
                   <div className="flex items-center gap-1.5 mb-1 opacity-70">
-                    <Heart className="w-3 h-3 fill-current" />
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" className="w-3 h-3">
+                      <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                    </svg>
                   </div>
 
                   <h4 
@@ -581,6 +587,55 @@ export default function EditorScreen({ photos, onRetake }) {
         </div>
 
       </div>
+
+      {/* Modal for Mobile Saving / Image Preview */}
+      {exportedImage && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md p-4 animate-fadeIn">
+          <div className="bg-[#18181B] border border-white/10 rounded-3xl p-6 max-w-md w-full flex flex-col items-center gap-4 shadow-2xl relative animate-scaleUp">
+            
+            <button 
+              onClick={() => setExportedImage(null)}
+              className="absolute top-4 right-4 text-gray-400 hover:text-white bg-white/5 hover:bg-white/10 w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold transition-all"
+            >
+              ✕
+            </button>
+            
+            <h3 className="text-sm font-semibold tracking-wider text-white uppercase text-center mt-2">
+              📸 Foto Berhasil Dibuat!
+            </h3>
+            
+            <p className="text-[11px] text-gray-400 text-center max-w-xs leading-relaxed">
+              Jika unduhan tidak berjalan otomatis, **tekan lama pada gambar** di bawah ini lalu pilih **"Simpan Gambar" / "Save Image"**.
+            </p>
+            
+            {/* Displayed Image */}
+            <div className="w-full flex justify-center py-2 max-h-[50vh] overflow-y-auto">
+              <img 
+                src={exportedImage} 
+                className="max-h-[45vh] w-auto rounded-xl shadow-xl border border-white/15 object-contain"
+                alt="Captured photostrip"
+              />
+            </div>
+            
+            <div className="w-full flex gap-3 mt-2">
+              <button
+                onClick={() => setExportedImage(null)}
+                className="flex-1 py-3 bg-white/5 border border-white/10 rounded-full text-xs font-semibold text-gray-300 hover:text-white hover:bg-white/10 transition-all"
+              >
+                Tutup / Close
+              </button>
+              <a
+                href={exportedImage}
+                download={`cipa-miniphotobox-${Date.now()}.png`}
+                className="flex-1 py-3 bg-amber-300 hover:bg-amber-400 text-[#121212] rounded-full text-xs font-semibold text-center shadow-lg transition-all"
+              >
+                Unduh Lagi
+              </a>
+            </div>
+            
+          </div>
+        </div>
+      )}
     </div>
   );
 }
