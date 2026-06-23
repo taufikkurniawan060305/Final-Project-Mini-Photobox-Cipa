@@ -22,10 +22,10 @@ const THEMES = [
   { 
     id: 'redbull', 
     name: 'Red Bull Racing F1 🏁', 
-    hex: '#0A1128', // Navy
+    hex: '#091024', // Red Bull Deep Navy
     text: '#FFFFFF', 
-    border: 'rgba(255, 255, 255, 0.12)',
-    customBg: { backgroundColor: '#0A1128' }
+    border: '#D11933', // Red Bull Red
+    customBg: { backgroundColor: '#091024' }
   },
   { 
     id: 'blue-picnic', 
@@ -144,7 +144,10 @@ export default function EditorScreen({ photos, onRetake }) {
             </label>
             <div className="grid grid-cols-2 gap-3">
               <button
-                onClick={() => setLayout('vertical')}
+                onClick={() => {
+                  setLayout('vertical');
+                  // Auto-switch to Red Bull if they want the exact grid style, but keep selectable
+                }}
                 className={`py-3 px-4 rounded-xl border text-xs font-medium tracking-wide transition-all ${
                   layout === 'vertical'
                     ? 'border-amber-300 bg-amber-300/5 text-white'
@@ -311,7 +314,9 @@ export default function EditorScreen({ photos, onRetake }) {
                   height: layout === 'vertical' ? '860px' : '580px',
                   ...selectedTheme.customBg,
                   color: selectedTheme.text,
-                  padding: layout === 'vertical' ? '18px' : '22px',
+                  padding: selectedTheme.id === 'redbull'
+                    ? (layout === 'vertical' ? '40px 24px 18px 24px' : '52px 24px 18px 24px')
+                    : (layout === 'vertical' ? '18px' : '22px'),
                   transition: 'background-color 0.4s ease, color 0.4s ease'
                 }}
               >
@@ -319,20 +324,63 @@ export default function EditorScreen({ photos, onRetake }) {
                 {/* Red Bull F1 Theme Custom Graphics */}
                 {selectedTheme.id === 'redbull' && (
                   <>
-                    {/* Checkerboard flags at top and bottom */}
-                    <div className="absolute top-0 left-0 w-full h-3 flex overflow-hidden opacity-95 z-20">
-                      {Array.from({ length: 24 }).map((_, i) => (
-                        <div key={i} className={`w-[13.5px] h-full ${i % 2 === 0 ? 'bg-[#FFCC00]' : 'bg-[#0A1128]'}`} />
+                    {/* Top Center Oracle Red Bull Racing F1 Team header trapezoid */}
+                    <div 
+                      className="absolute top-0 left-1/2 -translate-x-1/2 bg-[#091024] border-b-2 border-l-2 border-r-2 border-[#D11933] flex flex-col items-center justify-center pt-1.5 pb-2 px-6 z-20 shadow-md"
+                      style={{
+                        clipPath: 'polygon(0 0, 100% 0, 86% 100%, 14% 100%)',
+                        width: '210px',
+                        height: '46px'
+                      }}
+                    >
+                      <span className="text-[7px] font-bold tracking-[0.3em] text-white/50 leading-none">ORACLE</span>
+                      <span className="text-[9px] font-black tracking-wide text-white leading-none mt-0.5 uppercase">
+                        Red Bull <span className="text-[#FFCC00]">RACING</span>
+                      </span>
+                      <span className="text-[7px] font-bold tracking-[0.25em] text-[#D11933] leading-none mt-0.5">F1 TEAM</span>
+                    </div>
+
+                    {/* Red Racing Accent Lines on Left & Right Borders */}
+                    <div className="absolute top-0 left-0 w-[4px] h-full bg-[#D11933] z-20" />
+                    <div className="absolute top-0 right-0 w-[4px] h-full bg-[#D11933] z-20" />
+                    
+                    {/* Checkered flag banner at the very top */}
+                    <div className="absolute top-0 left-1 w-[calc(100%-8px)] h-2 flex overflow-hidden opacity-90 z-20">
+                      {Array.from({ length: 30 }).map((_, i) => (
+                        <div key={i} className={`w-[12px] h-full ${i % 2 === 0 ? 'bg-[#FFCC00]' : 'bg-[#091024]'}`} />
                       ))}
                     </div>
-                    {/* Red & Yellow Racing Stripe on Left Edge */}
-                    <div className="absolute top-0 left-0 w-2.5 h-full bg-[#E01E37] z-20" />
-                    <div className="absolute top-0 left-2.5 w-1.5 h-full bg-[#FFCC00] z-20" />
-                    
-                    {/* Red Bull Racing Text Badge */}
-                    <div className="absolute bottom-[80px] right-4 flex flex-col items-end opacity-85 z-20 select-none">
-                      <span className="text-[8px] font-bold tracking-widest text-[#E01E37] leading-none uppercase">RED BULL</span>
-                      <span className="text-[10px] font-extrabold tracking-wider text-[#FFCC00] leading-none uppercase">RACING</span>
+
+                    {/* Checkered flag banner at the very bottom */}
+                    <div className="absolute bottom-0 left-1 w-[calc(100%-8px)] h-2 flex overflow-hidden opacity-90 z-20">
+                      {Array.from({ length: 30 }).map((_, i) => (
+                        <div key={i} className={`w-[12px] h-full ${i % 2 === 0 ? 'bg-[#FFCC00]' : 'bg-[#091024]'}`} />
+                      ))}
+                    </div>
+
+                    {/* Left vertical border text */}
+                    <div className="absolute left-1.5 top-1/2 -translate-y-1/2 text-[6px] font-semibold tracking-[0.35em] text-white/35 select-none uppercase z-20"
+                         style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}>
+                      Oracle Red Bull Racing
+                    </div>
+
+                    {/* Right vertical border text */}
+                    <div className="absolute right-1.5 top-1/2 -translate-y-1/2 text-[6px] font-semibold tracking-[0.35em] text-white/35 select-none uppercase z-20"
+                         style={{ writingMode: 'vertical-rl' }}>
+                      Oracle Red Bull Racing
+                    </div>
+
+                    {/* Symmetrical Charging Bulls Logo at Bottom Center */}
+                    <div className="absolute bottom-[66px] left-1/2 -translate-x-1/2 z-20 flex items-center justify-center pointer-events-none">
+                      <svg width="76" height="34" viewBox="0 0 100 50" fill="none" className="filter drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]">
+                        <circle cx="50" cy="22" r="13" fill="#FFCC00" />
+                        {/* Left Charging Bull */}
+                        <path d="M 12,32 C 16,30 20,22 25,23 C 28,24 30,28 32,27 C 35,26 37,21 40,21 C 43,21 46,26 47,24 C 48,22 46,19 44,19 C 42,19 40,17 38,18 C 36,19 35,16 32,16 C 30,16 27,18 25,18 C 21,18 17,23 15,25 C 13,27 10,29 8,28 C 9,30 11,32 12,32 Z" fill="#D11933" />
+                        <path d="M 32,18 C 33,16 35,13 38,12 C 36,14 36,16 35,18 Z" fill="#D11933" />
+                        {/* Right Charging Bull */}
+                        <path d="M 88,32 C 84,30 80,22 75,23 C 72,24 70,28 68,27 C 65,26 63,21 60,21 C 57,21 54,26 53,24 C 52,22 54,19 56,19 C 58,19 60,17 62,18 C 64,19 65,16 68,16 C 70,16 73,18 75,18 C 79,18 83,23 85,25 C 87,27 90,29 92,28 C 91,30 89,32 88,32 Z" fill="#D11933" />
+                        <path d="M 68,18 C 67,16 65,13 62,12 C 64,14 64,16 65,18 Z" fill="#D11933" />
+                      </svg>
                     </div>
                   </>
                 )}
@@ -340,7 +388,6 @@ export default function EditorScreen({ photos, onRetake }) {
                 {/* Blue Picnic Vibes Custom Graphics */}
                 {selectedTheme.id === 'blue-picnic' && (
                   <>
-                    {/* Retro star decals */}
                     <div className="absolute top-6 left-5 text-[#FFCC00] text-lg font-bold select-none z-10 filter drop-shadow-sm">★</div>
                     <div className="absolute top-4 left-9 text-[#FFCC00] text-xs font-bold select-none z-10 filter drop-shadow-sm">★</div>
                     
@@ -404,22 +451,47 @@ export default function EditorScreen({ photos, onRetake }) {
                     {photos.slice(0, 4).map((src, index) => (
                       <div
                         key={index}
-                        className={`w-[284px] h-[174px] overflow-hidden bg-[#E2E8F0] shadow-sm relative flex-shrink-0 transition-all ${
-                          selectedTheme.id === 'vintage-candy' 
-                            ? 'border-4 border-double border-[#4A3E3D]/50 p-1 bg-[#FAF6EE]' 
-                            : ''
-                        }`}
-                        style={{ 
-                          border: selectedTheme.id !== 'vintage-candy' ? `1px solid ${selectedTheme.border}` : undefined,
-                          paddingLeft: selectedTheme.id === 'redbull' ? '12px' : undefined // shift from red/yellow stripes
-                        }}
+                        className="flex flex-col flex-shrink-0"
+                        style={{ gap: selectedTheme.id === 'redbull' ? '0px' : '14px' }}
                       >
-                        <img
-                          src={src}
-                          alt={`Frame ${index + 1}`}
-                          className="w-full h-full object-cover scale-x-[-1]"
-                          style={{ filter: selectedFilter.style }}
-                        />
+                        <div
+                          className={`w-[272px] h-[162px] overflow-hidden bg-[#E2E8F0] shadow-sm relative transition-all ${
+                            selectedTheme.id === 'vintage-candy' 
+                              ? 'border-4 border-double border-[#4A3E3D]/50 p-1 bg-[#FAF6EE] w-[284px] h-[174px]' 
+                              : ''
+                          }`}
+                          style={{ 
+                            border: (selectedTheme.id !== 'vintage-candy' && selectedTheme.id !== 'redbull') ? `1px solid ${selectedTheme.border}` : undefined,
+                            borderLeft: selectedTheme.id === 'redbull' ? '1px solid #D11933' : undefined,
+                            borderRight: selectedTheme.id === 'redbull' ? '1px solid #D11933' : undefined,
+                            borderTop: selectedTheme.id === 'redbull' ? '2px solid #D11933' : undefined,
+                            marginLeft: selectedTheme.id === 'redbull' ? '0px' : undefined,
+                            width: selectedTheme.id === 'redbull' ? '272px' : undefined,
+                            height: selectedTheme.id === 'redbull' ? '146px' : undefined,
+                          }}
+                        >
+                          {/* Driver tag logic overlay on third frame */}
+                          {selectedTheme.id === 'redbull' && index === 2 && (
+                            <div className="absolute top-2 left-2 bg-[#091024] border-l-4 border-[#D11933] py-0.5 px-2 text-[7px] font-black text-white tracking-wider uppercase select-none z-10 flex items-center gap-1">
+                              <span>{studioName.replace(" ❤️", "") || 'CIPA RACING'}</span>
+                              <span className="text-[#FFCC00]">1</span>
+                            </div>
+                          )}
+                          <img
+                            src={src}
+                            alt={`Frame ${index + 1}`}
+                            className="w-full h-full object-cover scale-x-[-1]"
+                            style={{ filter: selectedFilter.style }}
+                          />
+                        </div>
+                        {/* Red Bull GIVES YOU WINGS label banner */}
+                        {selectedTheme.id === 'redbull' && (
+                          <div className="w-[272px] bg-[#060A18] border-l border-r border-b border-[#D11933] py-1 flex items-center justify-center select-none">
+                            <span className="text-[6px] font-bold tracking-[0.25em] text-[#D11933]">
+                              GIVES YOU WINGS
+                            </span>
+                          </div>
+                        )}
                       </div>
                     ))}
                   </div>
@@ -427,26 +499,50 @@ export default function EditorScreen({ photos, onRetake }) {
 
                 {/* 2x2 Modern Grid Layout */}
                 {layout === 'grid' && (
-                  <div className="grid grid-cols-2 gap-3.5 h-[460px] content-start pt-2">
+                  <div className="grid grid-cols-2 gap-x-3 gap-y-3.5 h-[460px] content-start pt-2 px-1">
                     {photos.slice(0, 4).map((src, index) => (
                       <div
                         key={index}
-                        className={`w-[201px] h-[218px] overflow-hidden bg-[#E2E8F0] shadow-sm relative transition-all ${
-                          selectedTheme.id === 'vintage-candy' 
-                            ? 'border-4 border-double border-[#4A3E3D]/50 p-1 bg-[#FAF6EE]' 
-                            : ''
-                        }`}
-                        style={{ 
-                          border: selectedTheme.id !== 'vintage-candy' ? `1px solid ${selectedTheme.border}` : undefined,
-                          paddingLeft: (selectedTheme.id === 'redbull' && index % 2 === 0) ? '8px' : undefined
-                        }}
+                        className="flex flex-col"
+                        style={{ gap: selectedTheme.id === 'redbull' ? '0px' : '10px' }}
                       >
-                        <img
-                          src={src}
-                          alt={`Frame ${index + 1}`}
-                          className="w-full h-full object-cover scale-x-[-1]"
-                          style={{ filter: selectedFilter.style }}
-                        />
+                        <div
+                          className={`w-[196px] h-[184px] overflow-hidden bg-[#E2E8F0] shadow-sm relative transition-all ${
+                            selectedTheme.id === 'vintage-candy' 
+                              ? 'border-4 border-double border-[#4A3E3D]/50 p-1 bg-[#FAF6EE] w-[201px] h-[218px]' 
+                              : ''
+                          }`}
+                          style={{ 
+                            border: (selectedTheme.id !== 'vintage-candy' && selectedTheme.id !== 'redbull') ? `1px solid ${selectedTheme.border}` : undefined,
+                            borderLeft: selectedTheme.id === 'redbull' ? '1px solid #D11933' : undefined,
+                            borderRight: selectedTheme.id === 'redbull' ? '1px solid #D11933' : undefined,
+                            borderTop: selectedTheme.id === 'redbull' ? '2px solid #D11933' : undefined,
+                            width: selectedTheme.id === 'redbull' ? '196px' : undefined,
+                            height: selectedTheme.id === 'redbull' ? '172px' : undefined,
+                          }}
+                        >
+                          {/* Driver tag logic overlay on third frame */}
+                          {selectedTheme.id === 'redbull' && index === 2 && (
+                            <div className="absolute top-2 left-2 bg-[#091024] border-l-4 border-[#D11933] py-0.5 px-2 text-[7px] font-black text-white tracking-wider uppercase select-none z-10 flex items-center gap-1 shadow-md">
+                              <span>{studioName.replace(" ❤️", "") || 'CIPA RACING'}</span>
+                              <span className="text-[#FFCC00]">1</span>
+                            </div>
+                          )}
+                          <img
+                            src={src}
+                            alt={`Frame ${index + 1}`}
+                            className="w-full h-full object-cover scale-x-[-1]"
+                            style={{ filter: selectedFilter.style }}
+                          />
+                        </div>
+                        {/* Red Bull GIVES YOU WINGS label banner */}
+                        {selectedTheme.id === 'redbull' && (
+                          <div className="w-[196px] bg-[#060A18] border-l border-r border-b border-[#D11933] py-1 flex items-center justify-center select-none">
+                            <span className="text-[6px] font-bold tracking-[0.25em] text-[#D11933]">
+                              GIVES YOU WINGS
+                            </span>
+                          </div>
+                        )}
                       </div>
                     ))}
                   </div>
