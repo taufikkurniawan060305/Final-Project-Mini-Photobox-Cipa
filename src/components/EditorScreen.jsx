@@ -330,18 +330,25 @@ export default function EditorScreen({ photos, onRetake }) {
                   <>
                     {/* Top Center Oracle Red Bull Racing F1 Team header trapezoid */}
                     <div 
-                      className="absolute top-0 left-1/2 -translate-x-1/2 bg-[#091024] border-b-2 border-l-2 border-r-2 border-[#D11933] flex flex-col items-center justify-center pt-1.5 pb-2 px-6 z-20 shadow-md"
+                      className="absolute top-0 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center justify-center"
                       style={{
-                        clipPath: 'polygon(0 0, 100% 0, 86% 100%, 14% 100%)',
                         width: '210px',
                         height: '46px'
                       }}
                     >
-                      <span className="text-[7px] font-bold tracking-[0.3em] text-white/50 leading-none">ORACLE</span>
-                      <span className="text-[9px] font-black tracking-wide text-white leading-none mt-0.5 uppercase">
-                        Red Bull <span className="text-[#FFCC00]">RACING</span>
-                      </span>
-                      <span className="text-[7px] font-bold tracking-[0.25em] text-[#D11933] leading-none mt-0.5">F1 TEAM</span>
+                      {/* Background SVG Polygon for 100% html2canvas compatibility */}
+                      <svg width="210" height="46" viewBox="0 0 210 46" className="absolute inset-0 z-0">
+                        <path d="M 0,0 L 30,46 L 180,46 L 210,0" fill="#091024" stroke="#D11933" strokeWidth="2" />
+                      </svg>
+                      
+                      {/* Text content positioned on top of the polygon background */}
+                      <div className="z-10 flex flex-col items-center justify-center pt-1.5 pb-2">
+                        <span className="text-[7px] font-bold tracking-[0.3em] text-white/50 leading-none">ORACLE</span>
+                        <span className="text-[9px] font-black tracking-wide text-white leading-none mt-0.5 uppercase">
+                          Red Bull <span className="text-[#FFCC00]">RACING</span>
+                        </span>
+                        <span className="text-[7px] font-bold tracking-[0.25em] text-[#D11933] leading-none mt-0.5">F1 TEAM</span>
+                      </div>
                     </div>
 
                     {/* Red Racing Accent Lines on Left & Right Borders */}
