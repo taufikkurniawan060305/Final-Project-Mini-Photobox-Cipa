@@ -16,6 +16,13 @@ export default function CaptureScreen({ onPhotosCaptured, onBack }) {
   const captureIntervalRef = useRef(null);
   const isFirstLoadRef = useRef(true);
 
+  // Bind camera stream to the video element once it is rendered in the DOM
+  useEffect(() => {
+    if (videoRef.current && stream) {
+      videoRef.current.srcObject = stream;
+    }
+  }, [stream]);
+
   // Initialize camera and request permissions
   useEffect(() => {
     let activeStream = null;
@@ -32,9 +39,6 @@ export default function CaptureScreen({ onPhotosCaptured, onBack }) {
         
         activeStream = initialStream;
         setStream(initialStream);
-        if (videoRef.current) {
-          videoRef.current.srcObject = initialStream;
-        }
 
         // Step 2: Enumerate devices (will be fully populated since permission is granted)
         const devs = await navigator.mediaDevices.enumerateDevices();
@@ -88,9 +92,6 @@ export default function CaptureScreen({ onPhotosCaptured, onBack }) {
     })
     .then(mediaStream => {
       setStream(mediaStream);
-      if (videoRef.current) {
-        videoRef.current.srcObject = mediaStream;
-      }
       setError(null);
     })
     .catch(err => {
