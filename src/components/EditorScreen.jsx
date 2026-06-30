@@ -1,67 +1,95 @@
 import React, { useState, useRef } from 'react';
 import html2canvas from 'html2canvas';
-import { Download, RefreshCw, Layers, Palette, Sliders, Type, Heart } from 'lucide-react';
+import { Download, RefreshCw, Layers, Palette, Sliders, Type } from 'lucide-react';
 
 const THEMES = [
   { 
-    id: 'white', 
-    name: 'Off-White Minimalist', 
-    hex: '#F9F9FB', 
-    text: '#262626', 
-    border: 'rgba(0, 0, 0, 0.06)',
-    customBg: { backgroundColor: '#F9F9FB' }
-  },
-  { 
-    id: 'charcoal', 
-    name: 'Charcoal Minimalist', 
-    hex: '#1E1E1E', 
-    text: '#FAF9F6', 
-    border: 'rgba(255, 255, 255, 0.1)',
-    customBg: { backgroundColor: '#1E1E1E' }
-  },
-  { 
     id: 'redbull', 
     name: 'Red Bull Racing F1 🏁', 
-    hex: '#091024', // Red Bull Deep Navy
+    hex: '#091024',
     text: '#FFFFFF', 
-    border: '#D11933', // Red Bull Red
+    border: '#D11933',
     customBg: { backgroundColor: '#091024' }
   },
   { 
-    id: 'blue-picnic', 
-    name: 'Blue Picnic Vibes 🧺', 
-    hex: '#FAF9F6', 
-    text: '#1E3A8A', 
-    border: 'rgba(30, 58, 138, 0.12)',
+    id: 'retro-film', 
+    name: 'Retro Film Strip 🎞️', 
+    hex: '#0A0A0A',
+    text: '#E5E5E5', 
+    border: '#2A2A2A',
+    customBg: { backgroundColor: '#0A0A0A' }
+  },
+  { 
+    id: 'vintage-news', 
+    name: 'Vintage Newspaper 📰', 
+    hex: '#F1ECE3',
+    text: '#111111', 
+    border: '#111111',
+    customBg: { backgroundColor: '#F1ECE3' }
+  },
+  { 
+    id: 'retro-checker', 
+    name: '90s Checkerboard 🏁', 
+    hex: '#111111',
+    text: '#FFFFFF', 
+    border: '#111111',
+    customBg: { backgroundColor: '#FAF9F6' }
+  },
+  { 
+    id: 'vhs-tape', 
+    name: '90s VHS Camcorder 📼', 
+    hex: '#161618',
+    text: '#D1D1D6', 
+    border: '#2E2E33',
+    customBg: { backgroundColor: '#141416' }
+  },
+  { 
+    id: 'retro-comic', 
+    name: 'Retro Comic/Zine 📖', 
+    hex: '#FAF9F6',
+    text: '#111111', 
+    border: '#111111',
     customBg: {
-      backgroundColor: '#FFFFFF',
-      backgroundImage: 'linear-gradient(90deg, rgba(176, 203, 233, 0.4) 50%, transparent 50%), linear-gradient(rgba(176, 203, 233, 0.4) 50%, transparent 50%)',
-      backgroundSize: '24px 24px'
+      backgroundColor: '#FAF9F6',
+      backgroundImage: 'radial-gradient(#d3d1cb 1.2px, transparent 0)',
+      backgroundSize: '12px 12px'
     }
   },
   { 
-    id: 'vintage-candy', 
-    name: 'Vintage Candy 🍬', 
-    hex: '#FAF6EE', 
-    text: '#4A3E3D', 
-    border: 'rgba(74, 62, 61, 0.15)',
-    customBg: { backgroundColor: '#FAF6EE' }
+    id: 'postage-stamp', 
+    name: 'Vintage Stamp ✉️', 
+    hex: '#F4F0E6',
+    text: '#222222', 
+    border: '#222222',
+    customBg: { backgroundColor: '#F4F0E6' }
   },
   { 
-    id: 'y2k-pink', 
-    name: 'Y2K Sparkle Pink ✨', 
-    hex: '#FFF0F2', 
-    text: '#D81B60', 
-    border: 'rgba(216, 27, 96, 0.15)',
-    customBg: { backgroundColor: '#FFF0F2' }
+    id: 'retro-band', 
+    name: 'Retro Band Flyer 🎸', 
+    hex: '#1A1A1A',
+    text: '#F2F2F2', 
+    border: '#1A1A1A',
+    customBg: { backgroundColor: '#161616' }
   },
   { 
-    id: 'snap-joy', 
-    name: 'Retro Green Checker 🌟', 
-    hex: '#1E3F2E', 
-    text: '#FDE047', 
-    border: 'rgba(253, 224, 71, 0.15)',
-    customBg: { backgroundColor: '#1E3F2E' }
+    id: 'polaroid-classic', 
+    name: 'Polaroid Classic 📸', 
+    hex: '#F6F5F2',
+    text: '#222222', 
+    border: 'rgba(0, 0, 0, 0.08)',
+    customBg: { backgroundColor: '#F6F5F2' }
+  },
+  { 
+    id: 'cyber-grid', 
+    name: 'Dot-Matrix Cyberpunk 🖥️', 
+    hex: '#1E1F22',
+    text: '#E5E5E5', 
+    border: '#3C4043',
+    customBg: {
+      backgroundColor: '#1E1F22',
+      backgroundImage: 'radial-gradient(rgba(255, 255, 255, 0.08) 1.2px, transparent 0)',
+      backgroundSize: '16px 16px'
+    }
   }
 ];
 
@@ -71,6 +99,72 @@ const FILTERS = [
   { id: 'warm', name: 'Warm Vintage', style: 'sepia(30%) contrast(95%) saturate(95%) brightness(102%)' },
   { id: 'cold', name: 'Cold Chrome', style: 'saturate(115%) hue-rotate(185deg) contrast(108%) brightness(100%)' }
 ];
+
+const getPhotoWidth = (themeId, layout) => {
+  if (layout === 'vertical') {
+    switch (themeId) {
+      case 'redbull': return '272px';
+      case 'retro-film': return '248px';
+      case 'vintage-news': return '276px';
+      case 'retro-checker': return '256px';
+      case 'vhs-tape': return '276px';
+      case 'retro-comic': return '276px';
+      case 'postage-stamp': return '272px';
+      case 'retro-band': return '272px';
+      case 'polaroid-classic': return '284px';
+      case 'cyber-grid': return '284px';
+      default: return '284px';
+    }
+  } else {
+    // grid layout
+    switch (themeId) {
+      case 'redbull': return '196px';
+      case 'retro-film': return '184px';
+      case 'vintage-news': return '202px';
+      case 'retro-checker': return '188px';
+      case 'vhs-tape': return '202px';
+      case 'retro-comic': return '202px';
+      case 'postage-stamp': return '196px';
+      case 'retro-band': return '200px';
+      case 'polaroid-classic': return '202px';
+      case 'cyber-grid': return '202px';
+      default: return '202px';
+    }
+  }
+};
+
+const getPhotoHeight = (themeId, layout) => {
+  if (layout === 'vertical') {
+    switch (themeId) {
+      case 'redbull': return '146px';
+      case 'retro-film': return '152px';
+      case 'vintage-news': return '158px';
+      case 'retro-checker': return '154px';
+      case 'vhs-tape': return '156px';
+      case 'retro-comic': return '152px';
+      case 'postage-stamp': return '154px';
+      case 'retro-band': return '152px';
+      case 'polaroid-classic': return '158px';
+      case 'cyber-grid': return '164px';
+      default: return '164px';
+    }
+  } else {
+    // grid layout
+    switch (themeId) {
+      case 'redbull': return '172px';
+      case 'retro-film': return '170px';
+      case 'vintage-news': return '186px';
+      case 'retro-checker': return '180px';
+      case 'vhs-tape': return '184px';
+      case 'retro-comic': return '180px';
+      case 'postage-stamp': return '180px';
+      case 'retro-band': return '176px';
+      case 'polaroid-classic': return '190px';
+      case 'cyber-grid': return '190px';
+      default: return '190px';
+    }
+  }
+};
 
 export default function EditorScreen({ photos, onRetake }) {
   const [selectedTheme, setSelectedTheme] = useState(THEMES[0]);
@@ -93,27 +187,71 @@ export default function EditorScreen({ photos, onRetake }) {
     setIsExporting(true);
     
     try {
-      await new Promise(resolve => setTimeout(resolve, 300));
+      // Ensure all custom Google fonts are fully loaded prior to capture
+      if (document.fonts) {
+        await document.fonts.ready;
+      }
       
-      const canvas = await html2canvas(printRef.current, {
-        scale: 3, // High DPI
-        useCORS: true,
-        allowTaint: true,
-        logging: false,
-        backgroundColor: null,
+      // Wait for all images inside printRef to be fully loaded and decoded
+      const images = printRef.current.querySelectorAll('img');
+      const loadPromises = Array.from(images).map(img => {
+        if (img.complete) return Promise.resolve();
+        return new Promise(resolve => {
+          img.onload = resolve;
+          img.onerror = resolve;
+        });
+      });
+      await Promise.all(loadPromises);
+      
+      await new Promise(resolve => setTimeout(resolve, 350));
+      
+      let canvas;
+      try {
+        canvas = await html2canvas(printRef.current, {
+          scale: 3, // High DPI
+          useCORS: true,
+          allowTaint: false, // Must be false to allow canvas.toDataURL() without SecurityError
+          logging: false,
+          backgroundColor: null,
+        });
+      } catch (scaleErr) {
+        console.warn("Failed capturing at scale 3, retrying at scale 2...", scaleErr);
+        // Fallback to lower scale if canvas memory bounds are exceeded
+        canvas = await html2canvas(printRef.current, {
+          scale: 2,
+          useCORS: true,
+          allowTaint: false,
+          logging: false,
+          backgroundColor: null,
+        });
+      }
+      
+      // Convert canvas to Blob asynchronously for massive reliability improvements on mobile Safari and Chrome
+      const blob = await new Promise((resolve, reject) => {
+        canvas.toBlob((b) => {
+          if (b) resolve(b);
+          else reject(new Error("Failed to generate image blob"));
+        }, 'image/png');
       });
       
-      const dataUrl = canvas.toDataURL('image/png');
-      setExportedImage(dataUrl);
+      const blobUrl = URL.createObjectURL(blob);
+      setExportedImage(blobUrl);
       
-      // Attempt automatic download (works on Desktop)
+      // Attempt automatic download (works across desktop browsers)
       const link = document.createElement('a');
       link.download = `cipa-miniphotobox-${Date.now()}.png`;
-      link.href = dataUrl;
+      link.href = blobUrl;
+      
+      // Append to DOM for Safari / Firefox click trigger compatibility
+      document.body.appendChild(link);
       link.click();
+      document.body.removeChild(link);
+      
+      // Clean up blob URL after 1 minute to release memory
+      setTimeout(() => URL.revokeObjectURL(blobUrl), 60000);
     } catch (err) {
       console.error("Failed to generate photostrip image:", err);
-      alert("Something went wrong while exporting the image. Please try again.");
+      alert("Pemberitahuan: Terjadi kendala saat merender gambar resolusi tinggi. Silakan coba tekan kembali tombol download atau ambil tangkapan layar (screenshot) preview.");
     } finally {
       setIsExporting(false);
     }
@@ -150,7 +288,6 @@ export default function EditorScreen({ photos, onRetake }) {
               <button
                 onClick={() => {
                   setLayout('vertical');
-                  // Auto-switch to Red Bull if they want the exact grid style, but keep selectable
                 }}
                 className={`py-3 px-4 rounded-xl border text-xs font-medium tracking-wide transition-all ${
                   layout === 'vertical'
@@ -194,8 +331,12 @@ export default function EditorScreen({ photos, onRetake }) {
                     className="w-4 h-4 rounded-full border border-black/10 flex-shrink-0"
                     style={{ 
                       backgroundColor: theme.hex,
-                      backgroundImage: theme.id === 'blue-picnic' ? 'linear-gradient(45deg, #b0cbe9 25%, #faf9f6 25%, #faf9f6 50%, #b0cbe9 50%, #b0cbe9 75%, #faf9f6 75%)' : 'none',
-                      backgroundSize: theme.id === 'blue-picnic' ? '6px 6px' : 'none'
+                      backgroundImage: theme.id === 'retro-checker'
+                        ? 'linear-gradient(45deg, #111 25%, #fff 25%, #fff 50%, #111 50%, #111 75%, #fff 75%)'
+                        : theme.id === 'retro-comic'
+                          ? 'radial-gradient(#bbb 1.2px, #fff 0)'
+                          : 'none',
+                      backgroundSize: theme.id === 'retro-checker' ? '6px 6px' : theme.id === 'retro-comic' ? '4px 4px' : 'none'
                     }}
                   />
                   <span className="text-xs truncate">{theme.name}</span>
@@ -320,7 +461,21 @@ export default function EditorScreen({ photos, onRetake }) {
                   color: selectedTheme.text,
                   padding: selectedTheme.id === 'redbull'
                     ? (layout === 'vertical' ? '40px 24px 18px 24px' : '52px 24px 18px 24px')
-                    : (layout === 'vertical' ? '18px' : '22px'),
+                    : selectedTheme.id === 'retro-film'
+                      ? (layout === 'vertical' ? '20px 36px 18px 36px' : '24px 40px 18px 40px')
+                      : selectedTheme.id === 'vintage-news'
+                        ? (layout === 'vertical' ? '42px 22px 18px 22px' : '48px 22px 18px 22px')
+                        : selectedTheme.id === 'retro-checker'
+                          ? (layout === 'vertical' ? '20px 32px 18px 32px' : '24px 36px 18px 36px')
+                          : selectedTheme.id === 'vhs-tape'
+                            ? (layout === 'vertical' ? '32px 22px 18px 22px' : '40px 22px 18px 22px')
+                            : selectedTheme.id === 'retro-comic'
+                              ? (layout === 'vertical' ? '36px 22px 18px 22px' : '42px 22px 18px 22px')
+                              : selectedTheme.id === 'postage-stamp'
+                                ? (layout === 'vertical' ? '20px 24px 18px 24px' : '24px 28px 18px 28px')
+                                : selectedTheme.id === 'retro-band'
+                                  ? (layout === 'vertical' ? '28px 24px 18px 24px' : '32px 24px 18px 24px')
+                                  : (layout === 'vertical' ? '18px' : '22px'),
                   transition: 'background-color 0.4s ease, color 0.4s ease'
                 }}
               >
@@ -380,78 +535,198 @@ export default function EditorScreen({ photos, onRetake }) {
                          style={{ writingMode: 'vertical-rl' }}>
                       Oracle Red Bull Racing
                     </div>
+                  </>
+                )}
 
-                    {/* Symmetrical Charging Bulls Logo at Bottom Center */}
-                    <div className="absolute bottom-[66px] left-1/2 -translate-x-1/2 z-20 flex items-center justify-center pointer-events-none">
-                      <svg width="76" height="34" viewBox="0 0 100 50" fill="none">
-                        <circle cx="50" cy="22" r="13" fill="#FFCC00" />
-                        {/* Left Charging Bull */}
-                        <path d="M 12,32 C 16,30 20,22 25,23 C 28,24 30,28 32,27 C 35,26 37,21 40,21 C 43,21 46,26 47,24 C 48,22 46,19 44,19 C 42,19 40,17 38,18 C 36,19 35,16 32,16 C 30,16 27,18 25,18 C 21,18 17,23 15,25 C 13,27 10,29 8,28 C 9,30 11,32 12,32 Z" fill="#D11933" stroke="#FFCC00" strokeWidth="0.8" strokeLinejoin="round" />
-                        <path d="M 32,18 C 33,16 35,13 38,12 C 36,14 36,16 35,18 Z" fill="#D11933" stroke="#FFCC00" strokeWidth="0.8" strokeLinejoin="round" />
-                        {/* Right Charging Bull */}
-                        <path d="M 88,32 C 84,30 80,22 75,23 C 72,24 70,28 68,27 C 65,26 63,21 60,21 C 57,21 54,26 53,24 C 52,22 54,19 56,19 C 58,19 60,17 62,18 C 64,19 65,16 68,16 C 70,16 73,18 75,18 C 79,18 83,23 85,25 C 87,27 90,29 92,28 C 91,30 89,32 88,32 Z" fill="#D11933" stroke="#FFCC00" strokeWidth="0.8" strokeLinejoin="round" />
-                        <path d="M 68,18 C 67,16 65,13 62,12 C 64,14 64,16 65,18 Z" fill="#D11933" stroke="#FFCC00" strokeWidth="0.8" strokeLinejoin="round" />
+                {/* Retro 35mm Film Strip Custom Graphics */}
+                {selectedTheme.id === 'retro-film' && (
+                  <>
+                    {/* Left sprocket rail */}
+                    <div className="absolute left-2.5 top-0 bottom-0 w-3 flex flex-col justify-between py-4 z-20 pointer-events-none">
+                      {Array.from({ length: layout === 'vertical' ? 12 : 8 }).map((_, i) => (
+                        <div key={i} className="w-2.5 h-4 bg-[#1E1E1E] rounded-[2px] border border-white/10" />
+                      ))}
+                    </div>
+                    {/* Right sprocket rail */}
+                    <div className="absolute right-2.5 top-0 bottom-0 w-3 flex flex-col justify-between py-4 z-20 pointer-events-none">
+                      {Array.from({ length: layout === 'vertical' ? 12 : 8 }).map((_, i) => (
+                        <div key={i} className="w-2.5 h-4 bg-[#1E1E1E] rounded-[2px] border border-white/10" />
+                      ))}
+                    </div>
+                    {/* Kodak film edge info text */}
+                    <div className="absolute left-7 top-[15%] text-[7px] font-mono tracking-[0.3em] text-white/35 select-none z-20 uppercase"
+                         style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}>
+                      KODAK 400TX
+                    </div>
+                    <div className="absolute left-7 bottom-[15%] text-[7px] font-mono tracking-[0.3em] text-white/35 select-none z-20 uppercase"
+                         style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}>
+                      SAFETY FILM 24
+                    </div>
+                    <div className="absolute right-7 top-1/2 -translate-y-1/2 text-[7px] font-mono tracking-[0.3em] text-white/35 select-none z-20 uppercase"
+                         style={{ writingMode: 'vertical-rl' }}>
+                      ▲ 12A
+                    </div>
+                  </>
+                )}
+
+                {/* Vintage Newspaper Custom Graphics */}
+                {selectedTheme.id === 'vintage-news' && (
+                  <>
+                    {/* Outer double border */}
+                    <div className="absolute inset-2 border-4 border-double border-[#111111] pointer-events-none z-10" />
+                    {/* Newspaper masthead */}
+                    <div className="absolute top-4 left-6 right-6 flex justify-between items-center z-20 border-b border-[#111111] pb-1">
+                      <span className="text-[7px] font-serif italic font-bold text-[#111111]">DAILY ARCHIVE</span>
+                      <span className="text-[7px] font-mono text-[#111111] tracking-widest">N° 1994</span>
+                    </div>
+                  </>
+                )}
+
+                {/* 90s Checkerboard Skate Custom Graphics */}
+                {selectedTheme.id === 'retro-checker' && (
+                  <>
+                    {/* Left Checkered Column */}
+                    <div className="absolute left-0 top-0 bottom-0 w-4 flex flex-col overflow-hidden pointer-events-none z-10">
+                      {Array.from({ length: layout === 'vertical' ? 44 : 30 }).map((_, i) => (
+                        <div key={i} className={`w-4 h-4 flex-shrink-0 ${i % 2 === 0 ? 'bg-[#111111]' : 'bg-[#FAF9F6]'}`} />
+                      ))}
+                    </div>
+                    {/* Right Checkered Column */}
+                    <div className="absolute right-0 top-0 bottom-0 w-4 flex flex-col overflow-hidden pointer-events-none z-10">
+                      {Array.from({ length: layout === 'vertical' ? 44 : 30 }).map((_, i) => (
+                        <div key={i} className={`w-4 h-4 flex-shrink-0 ${i % 2 === 1 ? 'bg-[#111111]' : 'bg-[#FAF9F6]'}`} />
+                      ))}
+                    </div>
+                  </>
+                )}
+
+                {/* Dot-Matrix Cyberpunk Custom Graphics */}
+                {selectedTheme.id === 'cyber-grid' && (
+                  <>
+                    {/* Tech details */}
+                    <div className="absolute top-4 left-6 text-[8px] font-mono text-white/30 select-none z-20 uppercase">
+                      SYS_REC_ON
+                    </div>
+                    <div className="absolute top-4 right-6 text-[8px] font-mono text-white/30 select-none z-20 uppercase">
+                      B&W_MOD
+                    </div>
+                    {/* Scanning lines aesthetic (subtle) */}
+                    <div className="absolute inset-0 pointer-events-none z-10 bg-linear-to-b from-white/1 to-transparent bg-[size:100%_4px]" />
+                  </>
+                )}
+
+                {/* 90s VHS Camcorder Custom Graphics */}
+                {selectedTheme.id === 'vhs-tape' && (
+                  <>
+                    {/* Play indicator */}
+                    <div className="absolute top-4 left-6 flex items-center gap-1.5 text-[8px] font-mono text-emerald-400 select-none z-20">
+                      <span className="text-[7px]">▶</span> PLAY
+                    </div>
+                    {/* VHS status count */}
+                    <div className="absolute top-4 right-6 text-right text-[8px] font-mono text-white/50 select-none z-20">
+                      <div>SP</div>
+                      <div className="mt-0.5">L-CODE 90</div>
+                    </div>
+                    {/* VHS tracking lines/battery at bottom */}
+                    <div className="absolute bottom-[92px] left-6 right-6 flex justify-between items-center text-[7px] font-mono text-white/30 select-none z-20">
+                      <span>HI-FI STEREO</span>
+                      <span>AUTO TRACKING</span>
+                    </div>
+                  </>
+                )}
+
+                {/* Retro Comic/Zine Custom Graphics */}
+                {selectedTheme.id === 'retro-comic' && (
+                  <>
+                    {/* Top center explosion pop badge */}
+                    <div className="absolute top-3 left-1/2 -translate-x-1/2 z-20 flex items-center justify-center">
+                      <svg width="60" height="26" viewBox="0 0 60 26" className="filter drop-shadow-[2px_2px_0px_rgba(0,0,0,1)]">
+                        <polygon 
+                          points="5,13 12,2 25,5 30,1 35,5 48,2 55,13 48,24 35,21 30,25 25,21 12,24" 
+                          fill="#FAF9F6" 
+                          stroke="#111111" 
+                          strokeWidth="1.5" 
+                        />
+                        <text 
+                          x="50%" 
+                          y="62%" 
+                          dominantBaseline="middle" 
+                          textAnchor="middle" 
+                          className="font-serif italic font-extrabold text-[8px] fill-[#111111] tracking-wider"
+                        >
+                          SNAP!
+                        </text>
                       </svg>
                     </div>
-                  </>
-                )}
-
-                {/* Blue Picnic Vibes Custom Graphics */}
-                {selectedTheme.id === 'blue-picnic' && (
-                  <>
-                    <div className="absolute top-6 left-5 text-[#FFCC00] text-lg font-bold select-none z-10 filter drop-shadow-sm">★</div>
-                    <div className="absolute top-4 left-9 text-[#FFCC00] text-xs font-bold select-none z-10 filter drop-shadow-sm">★</div>
-                    
-                    <div className="absolute bottom-[88px] right-5 text-[#FFCC00] text-lg font-bold select-none z-10 filter drop-shadow-sm">★</div>
-                    <div className="absolute bottom-[102px] right-9 text-[#FFCC00] text-xs font-bold select-none z-10 filter drop-shadow-sm">★</div>
-                    
-                    {/* Vibes Check Banner Above Footer */}
-                    <div className="absolute bottom-[84px] left-0 w-full h-6 flex items-center justify-center border-t border-b border-blue-900/10 bg-sky-200/20 z-10">
-                      <span className="text-[9px] font-bold tracking-[0.2em] text-blue-900/70 uppercase">
-                        VIBES & CHILL
-                      </span>
-                    </div>
-                  </>
-                )}
-
-                {/* Vintage Candy Theme Custom Graphics */}
-                {selectedTheme.id === 'vintage-candy' && (
-                  <>
-                    {/* Striped retro header */}
-                    <div className="absolute top-0 left-0 w-full h-4 flex overflow-hidden z-10">
-                      {Array.from({ length: 16 }).map((_, i) => (
-                        <div key={i} className={`flex-grow h-full ${i % 2 === 0 ? 'bg-[#963D3C]' : 'bg-[#FAF6EE]'}`} />
+                    {/* Symmetrical comic dots border decoration */}
+                    <div className="absolute left-1.5 top-1/2 -translate-y-1/2 w-1.5 h-[80%] flex flex-col justify-between opacity-35 z-20 pointer-events-none">
+                      {Array.from({ length: 8 }).map((_, i) => (
+                        <div key={i} className="w-1.5 h-1.5 rounded-full bg-[#111111]" />
                       ))}
                     </div>
-                    {/* Striped retro footer */}
-                    <div className="absolute bottom-0 left-0 w-full h-4 flex overflow-hidden z-10">
-                      {Array.from({ length: 16 }).map((_, i) => (
-                        <div key={i} className={`flex-grow h-full ${i % 2 === 0 ? 'bg-[#963D3C]' : 'bg-[#FAF6EE]'}`} />
+                    <div className="absolute right-1.5 top-1/2 -translate-y-1/2 w-1.5 h-[80%] flex flex-col justify-between opacity-35 z-20 pointer-events-none">
+                      {Array.from({ length: 8 }).map((_, i) => (
+                        <div key={i} className="w-1.5 h-1.5 rounded-full bg-[#111111]" />
                       ))}
                     </div>
                   </>
                 )}
 
-                {/* Y2K Sparkle Pink Graphics */}
-                {selectedTheme.id === 'y2k-pink' && (
+                {/* Vintage Postage Stamp Custom Graphics */}
+                {selectedTheme.id === 'postage-stamp' && (
                   <>
-                    <span className="absolute top-8 left-6 text-pink-600 text-lg z-10 animate-pulse">✦</span>
-                    <span className="absolute top-5 left-10 text-pink-400 text-xs z-10">✦</span>
-                    <span className="absolute bottom-[98px] right-6 text-pink-600 text-lg z-10 animate-pulse">✦</span>
-                    <span className="absolute bottom-[113px] right-10 text-pink-400 text-xs z-10">✦</span>
+                    {/* Left perforated stamp holes */}
+                    <div className="absolute -left-1.5 top-0 bottom-0 w-3 flex flex-col justify-between py-6 z-20 pointer-events-none">
+                      {Array.from({ length: layout === 'vertical' ? 18 : 12 }).map((_, i) => (
+                        <div key={i} className="w-3 h-3 bg-[#121212] rounded-full border border-black/5" />
+                      ))}
+                    </div>
+                    {/* Right perforated stamp holes */}
+                    <div className="absolute -right-1.5 top-0 bottom-0 w-3 flex flex-col justify-between py-6 z-20 pointer-events-none">
+                      {Array.from({ length: layout === 'vertical' ? 18 : 12 }).map((_, i) => (
+                        <div key={i} className="w-3 h-3 bg-[#121212] rounded-full border border-black/5" />
+                      ))}
+                    </div>
+                    {/* Circular postmark stamp overlay */}
+                    <div className="absolute top-2 right-6 w-12 h-12 rounded-full border border-[#222222]/30 flex flex-col items-center justify-center text-[5px] font-mono text-[#222222]/40 select-none z-20 rotate-12 pointer-events-none">
+                      <div className="border-b border-[#222222]/20 w-10 text-center pb-0.5 font-bold">AIR MAIL</div>
+                      <div className="pt-0.5 tracking-widest leading-none">POSTAGE</div>
+                    </div>
                   </>
                 )}
 
-                {/* Retro Checker Green Custom Graphics */}
-                {selectedTheme.id === 'snap-joy' && (
+                {/* Retro Band Flyer Custom Graphics */}
+                {selectedTheme.id === 'retro-band' && (
                   <>
-                    <div className="absolute top-6 left-6 text-yellow-300 text-base z-10">★</div>
-                    <div className="absolute bottom-[98px] right-6 text-yellow-300 text-base z-10">★</div>
-                    {/* Black & White Checkered border above footer */}
-                    <div className="absolute bottom-[80px] left-0 w-full h-5 flex overflow-hidden border-t border-b border-black/30 z-10">
-                      {Array.from({ length: 18 }).map((_, i) => (
-                        <div key={i} className={`flex-grow h-full ${i % 2 === 0 ? 'bg-[#FAF9F6]' : 'bg-[#1E1E1E]'}`} />
-                      ))}
+                    {/* Top Gig Flyer Details */}
+                    <div className="absolute top-3.5 left-6 text-[7px] font-mono tracking-widest text-white/50 select-none z-20">
+                      [ LIVE STAGE // ALL ACCESS PASS ]
+                    </div>
+                    <div className="absolute top-3.5 right-6 text-[7px] font-mono tracking-widest text-white/50 select-none z-20">
+                      VOL_99
+                    </div>
+                    {/* Side tour details */}
+                    <div className="absolute left-7 top-[48%] -translate-y-1/2 text-[6px] font-mono tracking-[0.4em] text-white/20 select-none z-20 uppercase"
+                         style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}>
+                      GIG DATE // SOUL & ROCK
+                    </div>
+                    <div className="absolute right-7 top-[48%] -translate-y-1/2 text-[6px] font-mono tracking-[0.4em] text-white/20 select-none z-20 uppercase"
+                         style={{ writingMode: 'vertical-rl' }}>
+                      WORLD TOUR OVERDRIVE
+                    </div>
+                    {/* Barcode graphic at the bottom */}
+                    <div className="absolute bottom-[92px] left-6 right-6 flex items-center justify-between pointer-events-none z-20 opacity-30">
+                      <div className="flex items-center gap-[1px] h-3 bg-white/20 px-1 py-[1px] rounded">
+                        <div className="w-[1px] h-full bg-white" />
+                        <div className="w-[2px] h-full bg-white" />
+                        <div className="w-[1px] h-full bg-white" />
+                        <div className="w-[3px] h-full bg-white" />
+                        <div className="w-[1px] h-full bg-white" />
+                        <div className="w-[2px] h-full bg-white" />
+                        <div className="w-[1px] h-full bg-white" />
+                        <div className="w-[1px] h-full bg-white" />
+                      </div>
+                      <span className="text-[6px] font-mono text-white/50">#00996688</span>
                     </div>
                   </>
                 )}
@@ -462,23 +737,32 @@ export default function EditorScreen({ photos, onRetake }) {
                     {photos.slice(0, 4).map((src, index) => (
                       <div
                         key={index}
-                        className="flex flex-col flex-shrink-0"
+                        className="flex flex-col flex-shrink-0 items-center"
                         style={{ gap: selectedTheme.id === 'redbull' ? '0px' : '14px' }}
                       >
                         <div
-                          className={`w-[272px] h-[162px] overflow-hidden bg-[#E2E8F0] shadow-sm relative transition-all ${
-                            selectedTheme.id === 'vintage-candy' 
-                              ? 'border-4 border-double border-[#4A3E3D]/50 p-1 bg-[#FAF6EE] w-[284px] h-[174px]' 
-                              : ''
+                          className={`overflow-hidden bg-[#E2E8F0] shadow-sm relative transition-all ${
+                            selectedTheme.id === 'polaroid-classic' 
+                              ? 'p-2 pb-6 bg-white border border-gray-200/60 shadow-[0_4px_10px_rgba(0,0,0,0.06)]' 
+                              : selectedTheme.id === 'retro-checker'
+                                ? 'p-1.5 bg-white border border-[#111111] shadow-sm'
+                                : selectedTheme.id === 'retro-comic'
+                                  ? 'p-1 bg-[#FAF9F6] border-2 border-[#111111] shadow-[2px_2px_0px_rgba(0,0,0,1)]'
+                                  : selectedTheme.id === 'postage-stamp'
+                                    ? 'p-1 bg-[#F4F0E6] border border-dashed border-[#222222] shadow-sm'
+                                    : selectedTheme.id === 'retro-band'
+                                      ? 'p-1 bg-[#1E1E1E] border border-white/10 shadow-[0_4px_12px_rgba(0,0,0,0.5)]'
+                                      : ''
                           }`}
                           style={{ 
-                            border: (selectedTheme.id !== 'vintage-candy' && selectedTheme.id !== 'redbull') ? `1px solid ${selectedTheme.border}` : undefined,
+                            border: (selectedTheme.id !== 'polaroid-classic' && selectedTheme.id !== 'retro-checker' && selectedTheme.id !== 'retro-comic' && selectedTheme.id !== 'redbull') 
+                              ? `1px solid ${selectedTheme.border}` 
+                              : undefined,
                             borderLeft: selectedTheme.id === 'redbull' ? '1px solid #D11933' : undefined,
                             borderRight: selectedTheme.id === 'redbull' ? '1px solid #D11933' : undefined,
                             borderTop: selectedTheme.id === 'redbull' ? '2px solid #D11933' : undefined,
-                            marginLeft: selectedTheme.id === 'redbull' ? '0px' : undefined,
-                            width: selectedTheme.id === 'redbull' ? '272px' : undefined,
-                            height: selectedTheme.id === 'redbull' ? '146px' : undefined,
+                            width: getPhotoWidth(selectedTheme.id, 'vertical'),
+                            height: getPhotoHeight(selectedTheme.id, 'vertical'),
                           }}
                         >
                           {/* Driver tag logic overlay on third frame */}
@@ -488,6 +772,29 @@ export default function EditorScreen({ photos, onRetake }) {
                               <span className="text-[#FFCC00]">1</span>
                             </div>
                           )}
+
+                          {/* Tape strip overlay */}
+                          {selectedTheme.id === 'retro-band' && (
+                            <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-14 h-3 bg-white/20 border border-white/5 shadow-xs rotate-[-3deg] backdrop-blur-[1px] z-20 pointer-events-none" />
+                          )}
+
+                          {/* Cyber grid bracket accents */}
+                          {selectedTheme.id === 'cyber-grid' && (
+                            <>
+                              <div className="absolute top-1 left-1 text-[8px] font-mono text-white/50 select-none pointer-events-none leading-none">┌</div>
+                              <div className="absolute top-1 right-1 text-[8px] font-mono text-white/50 select-none pointer-events-none leading-none">┐</div>
+                              <div className="absolute bottom-1 left-1 text-[8px] font-mono text-white/50 select-none pointer-events-none leading-none">└</div>
+                              <div className="absolute bottom-1 right-1 text-[8px] font-mono text-white/50 select-none pointer-events-none leading-none">┘</div>
+                            </>
+                          )}
+
+                          {/* Film frame numbering details */}
+                          {selectedTheme.id === 'retro-film' && (
+                            <div className="absolute bottom-1 right-1 bg-black/60 text-white/80 font-mono text-[6px] px-1 py-0.5 rounded border border-white/5 z-10 select-none leading-none">
+                              #{index + 1}
+                            </div>
+                          )}
+
                           <img
                             src={src}
                             alt={`Frame ${index + 1}`}
@@ -510,26 +817,36 @@ export default function EditorScreen({ photos, onRetake }) {
 
                 {/* 2x2 Modern Grid Layout */}
                 {layout === 'grid' && (
-                  <div className="grid grid-cols-2 gap-x-3 gap-y-3.5 h-[460px] content-start pt-2 px-1">
+                  <div className="grid grid-cols-2 gap-x-3 gap-y-3.5 h-[460px] content-start pt-2 px-1 justify-items-center">
                     {photos.slice(0, 4).map((src, index) => (
                       <div
                         key={index}
-                        className="flex flex-col"
+                        className="flex flex-col items-center"
                         style={{ gap: selectedTheme.id === 'redbull' ? '0px' : '10px' }}
                       >
                         <div
-                          className={`w-[196px] h-[184px] overflow-hidden bg-[#E2E8F0] shadow-sm relative transition-all ${
-                            selectedTheme.id === 'vintage-candy' 
-                              ? 'border-4 border-double border-[#4A3E3D]/50 p-1 bg-[#FAF6EE] w-[201px] h-[218px]' 
-                              : ''
+                          className={`overflow-hidden bg-[#E2E8F0] shadow-sm relative transition-all ${
+                            selectedTheme.id === 'polaroid-classic' 
+                              ? 'p-2 pb-5 bg-white border border-gray-250/60 shadow-[0_4px_10px_rgba(0,0,0,0.06)]' 
+                              : selectedTheme.id === 'retro-checker'
+                                ? 'p-1 bg-white border border-[#111111] shadow-sm'
+                                : selectedTheme.id === 'retro-comic'
+                                  ? 'p-1 bg-[#FAF9F6] border-2 border-[#111111] shadow-[2px_2px_0px_rgba(0,0,0,1)]'
+                                  : selectedTheme.id === 'postage-stamp'
+                                    ? 'p-1 bg-[#F4F0E6] border border-dashed border-[#222222] shadow-sm'
+                                    : selectedTheme.id === 'retro-band'
+                                      ? 'p-1 bg-[#1E1E1E] border border-white/10 shadow-[0_4px_12px_rgba(0,0,0,0.5)]'
+                                      : ''
                           }`}
                           style={{ 
-                            border: (selectedTheme.id !== 'vintage-candy' && selectedTheme.id !== 'redbull') ? `1px solid ${selectedTheme.border}` : undefined,
+                            border: (selectedTheme.id !== 'polaroid-classic' && selectedTheme.id !== 'retro-checker' && selectedTheme.id !== 'retro-comic' && selectedTheme.id !== 'redbull') 
+                              ? `1px solid ${selectedTheme.border}` 
+                              : undefined,
                             borderLeft: selectedTheme.id === 'redbull' ? '1px solid #D11933' : undefined,
                             borderRight: selectedTheme.id === 'redbull' ? '1px solid #D11933' : undefined,
                             borderTop: selectedTheme.id === 'redbull' ? '2px solid #D11933' : undefined,
-                            width: selectedTheme.id === 'redbull' ? '196px' : undefined,
-                            height: selectedTheme.id === 'redbull' ? '172px' : undefined,
+                            width: getPhotoWidth(selectedTheme.id, 'grid'),
+                            height: getPhotoHeight(selectedTheme.id, 'grid'),
                           }}
                         >
                           {/* Driver tag logic overlay on third frame */}
@@ -539,6 +856,29 @@ export default function EditorScreen({ photos, onRetake }) {
                               <span className="text-[#FFCC00]">1</span>
                             </div>
                           )}
+
+                          {/* Tape strip overlay */}
+                          {selectedTheme.id === 'retro-band' && (
+                            <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-14 h-3 bg-white/20 border border-white/5 shadow-xs rotate-[-3deg] backdrop-blur-[1px] z-20 pointer-events-none" />
+                          )}
+
+                          {/* Cyber grid bracket accents */}
+                          {selectedTheme.id === 'cyber-grid' && (
+                            <>
+                              <div className="absolute top-1 left-1 text-[8px] font-mono text-white/50 select-none pointer-events-none leading-none">┌</div>
+                              <div className="absolute top-1 right-1 text-[8px] font-mono text-white/50 select-none pointer-events-none leading-none">┐</div>
+                              <div className="absolute bottom-1 left-1 text-[8px] font-mono text-white/50 select-none pointer-events-none leading-none">└</div>
+                              <div className="absolute bottom-1 right-1 text-[8px] font-mono text-white/50 select-none pointer-events-none leading-none">┘</div>
+                            </>
+                          )}
+
+                          {/* Film frame numbering details */}
+                          {selectedTheme.id === 'retro-film' && (
+                            <div className="absolute bottom-1 right-1 bg-black/60 text-white/80 font-mono text-[6px] px-1 py-0.5 rounded border border-white/5 z-10 select-none leading-none">
+                              #{index + 1}
+                            </div>
+                          )}
+
                           <img
                             src={src}
                             alt={`Frame ${index + 1}`}
@@ -561,29 +901,59 @@ export default function EditorScreen({ photos, onRetake }) {
 
                 {/* Branding footer */}
                 <div 
-                  className={`flex flex-col items-center justify-center text-center ${
+                  className={`flex flex-col items-center justify-center text-center shrink-0 ${
                     layout === 'vertical' ? 'h-[80px]' : 'h-[60px] mt-2'
                   }`}
                 >
-                  <div className="flex items-center gap-1.5 mb-1 opacity-70">
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" className="w-3 h-3">
-                      <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
-                    </svg>
-                  </div>
+                  <div className={`flex flex-col items-center justify-center ${
+                    selectedTheme.id === 'retro-checker' || selectedTheme.id === 'retro-comic'
+                      ? 'bg-white text-[#111111] px-5 py-1.5 border border-[#111111] shadow-[2px_2px_0px_#111] rounded'
+                      : selectedTheme.id === 'retro-band'
+                        ? 'border border-dashed border-white/20 px-4 py-1.5 bg-[#121212]/50 text-[#F2F2F2] rounded'
+                        : ''
+                  }`}>
+                    {selectedTheme.id === 'redbull' && (
+                      <div className="flex items-center justify-center mb-1.5 w-[60px] h-[30px] select-none pointer-events-none">
+                        <img 
+                          src="./redbull_logo_transparent.png"
+                          alt="Red Bull Racing Logo"
+                          className="w-full h-full object-contain"
+                        />
+                      </div>
+                    )}
+                    
 
-                  <h4 
-                    className="font-serif text-sm tracking-[0.2em] font-bold uppercase leading-none mb-1"
-                    style={{ color: selectedTheme.text }}
-                  >
-                    {studioName || 'CIPA STUDIO ❤️'}
-                  </h4>
-                  
-                  <p 
-                    className="text-[10px] tracking-widest font-light opacity-65"
-                    style={{ color: selectedTheme.text }}
-                  >
-                    {dateStr || '2026.06.23'}
-                  </p>
+
+                    <h4 
+                      className={`font-bold uppercase leading-none mb-1 ${
+                        selectedTheme.id === 'retro-film' || selectedTheme.id === 'cyber-grid' || selectedTheme.id === 'vhs-tape' || selectedTheme.id === 'retro-band'
+                          ? 'font-mono text-xs tracking-widest'
+                          : selectedTheme.id === 'redbull'
+                            ? 'font-sans font-black text-[11px] tracking-[0.2em]'
+                            : selectedTheme.id === 'polaroid-classic'
+                              ? 'font-serif italic text-xs lowercase tracking-wider'
+                              : selectedTheme.id === 'vintage-news' || selectedTheme.id === 'postage-stamp'
+                                ? 'font-serif text-sm tracking-[0.25em]'
+                                : 'font-serif text-sm tracking-[0.2em]'
+                      }`}
+                      style={{ color: (selectedTheme.id === 'retro-checker' || selectedTheme.id === 'retro-comic') ? '#111111' : selectedTheme.text }}
+                    >
+                      {studioName || 'CIPA STUDIO ❤️'}
+                    </h4>
+                    
+                    <p 
+                      className={`text-[9px] tracking-widest font-light opacity-65 ${
+                        selectedTheme.id === 'retro-film' || selectedTheme.id === 'cyber-grid' || selectedTheme.id === 'vhs-tape' || selectedTheme.id === 'retro-band'
+                          ? 'font-mono'
+                          : selectedTheme.id === 'redbull'
+                            ? 'font-sans font-bold text-[8px] tracking-[0.15em]'
+                            : ''
+                      }`}
+                      style={{ color: (selectedTheme.id === 'retro-checker' || selectedTheme.id === 'retro-comic') ? '#111111' : (selectedTheme.id === 'redbull' ? '#FFCC00' : selectedTheme.text) }}
+                    >
+                      {dateStr || '2026.06.23'}
+                    </p>
+                  </div>
                 </div>
 
               </div>

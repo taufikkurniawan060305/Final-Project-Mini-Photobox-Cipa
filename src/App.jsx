@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import WelcomeScreen from './components/WelcomeScreen';
 import CaptureScreen from './components/CaptureScreen';
 import EditorScreen from './components/EditorScreen';
-import { Camera, Sparkles } from 'lucide-react';
+import { Camera } from 'lucide-react';
 
 export default function App() {
   const [step, setStep] = useState('welcome'); // 'welcome' | 'capture' | 'editor'
