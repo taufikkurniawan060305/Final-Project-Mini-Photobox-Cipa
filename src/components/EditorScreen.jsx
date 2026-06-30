@@ -181,21 +181,12 @@ export default function EditorScreen({ photos, onRetake }) {
   const [isExporting, setIsExporting] = useState(false);
   const [exportedImage, setExportedImage] = useState(null);
   const printRef = useRef(null);
-  const wrapperRef = useRef(null);
 
   const handleDownload = async () => {
     if (!printRef.current || isExporting) return;
     setIsExporting(true);
     
-    // Temporarily reset scale to 1 to prevent html2canvas layout bugs and blurry/shifted text
-    const scalingWrapper = wrapperRef.current;
-    let originalTransform = '';
-    if (scalingWrapper) {
-      originalTransform = scalingWrapper.style.transform;
-      scalingWrapper.style.transform = 'scale(1)';
-      scalingWrapper.style.transition = 'none';
-    }
-    
+    let container = null;
     try {
       // Ensure all custom Google fonts are fully loaded prior to capture
       if (document.fonts) {
@@ -213,26 +204,53 @@ export default function EditorScreen({ photos, onRetake }) {
       });
       await Promise.all(loadPromises);
       
-      await new Promise(resolve => setTimeout(resolve, 350));
+      // Clone the target element for clean, unscaled rendering offscreen
+      const targetElement = printRef.current;
+      const clone = targetElement.cloneNode(true);
+      
+      // Setup a temporary off-screen container at 1:1 scale
+      container = document.createElement('div');
+      container.style.position = 'absolute';
+      container.style.left = '-9999px';
+      container.style.top = '0px';
+      container.style.width = layout === 'vertical' ? '320px' : '460px';
+      container.style.height = layout === 'vertical' ? '860px' : '580px';
+      container.style.transform = 'none';
+      container.style.transition = 'none';
+      
+      // Ensure the cloned photostrip itself is rendered at full 1:1 scale
+      clone.style.transform = 'none';
+      clone.style.transition = 'none';
+      clone.style.width = layout === 'vertical' ? '320px' : '460px';
+      clone.style.height = layout === 'vertical' ? '860px' : '580px';
+      
+      container.appendChild(clone);
+      document.body.appendChild(container);
+      
+      // Small pause to allow the browser to register offscreen layout and paint
+      await new Promise(resolve => setTimeout(resolve, 150));
       
       let canvas;
       try {
-        canvas = await html2canvas(printRef.current, {
+        canvas = await html2canvas(clone, {
           scale: 3, // High DPI
           useCORS: true,
           allowTaint: false, // Must be false to allow canvas.toDataURL() without SecurityError
           logging: false,
           backgroundColor: null,
+          width: layout === 'vertical' ? 320 : 460,
+          height: layout === 'vertical' ? 860 : 580,
         });
       } catch (scaleErr) {
         console.warn("Failed capturing at scale 3, retrying at scale 2...", scaleErr);
-        // Fallback to lower scale if canvas memory bounds are exceeded
-        canvas = await html2canvas(printRef.current, {
+        canvas = await html2canvas(clone, {
           scale: 2,
           useCORS: true,
           allowTaint: false,
           logging: false,
           backgroundColor: null,
+          width: layout === 'vertical' ? 320 : 460,
+          height: layout === 'vertical' ? 860 : 580,
         });
       }
       
@@ -263,10 +281,9 @@ export default function EditorScreen({ photos, onRetake }) {
       console.error("Failed to generate photostrip image:", err);
       alert("Pemberitahuan: Terjadi kendala saat merender gambar resolusi tinggi. Silakan coba tekan kembali tombol download atau ambil tangkapan layar (screenshot) preview.");
     } finally {
-      // Restore scaling
-      if (scalingWrapper) {
-        scalingWrapper.style.transform = originalTransform;
-        scalingWrapper.style.transition = '';
+      // Remove the off-screen container from DOM
+      if (container && container.parentNode) {
+        container.parentNode.removeChild(container);
       }
       setIsExporting(false);
     }
@@ -458,9 +475,7 @@ export default function EditorScreen({ photos, onRetake }) {
           <div className="w-full flex items-center justify-center overflow-auto py-4">
             
             {/* Visual Scaling Wrapper */}
-            <div 
-              ref={wrapperRef}
-              className="origin-top transition-transform duration-300 scale-[0.55] sm:scale-[0.75] md:scale-90 lg:scale-[0.62] xl:scale-[0.85]"
+            <div className="origin-top transition-transform duration-300 scale-[0.55] sm:scale-[0.75] md:scale-90 lg:scale-[0.62] xl:scale-[0.85]"
               style={{
                 height: layout === 'vertical' ? '860px' : '580px',
                 width: layout === 'vertical' ? '320px' : '460px'
