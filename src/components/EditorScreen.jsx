@@ -186,7 +186,6 @@ export default function EditorScreen({ photos, onRetake }) {
     if (!printRef.current || isExporting) return;
     setIsExporting(true);
     
-    let container = null;
     try {
       // Ensure all custom Google fonts are fully loaded prior to capture
       if (document.fonts) {
@@ -204,35 +203,12 @@ export default function EditorScreen({ photos, onRetake }) {
       });
       await Promise.all(loadPromises);
       
-      // Clone the target element for clean, unscaled rendering offscreen
-      const targetElement = printRef.current;
-      const clone = targetElement.cloneNode(true);
-      
-      // Setup a temporary off-screen container at 1:1 scale
-      container = document.createElement('div');
-      container.style.position = 'absolute';
-      container.style.left = '-9999px';
-      container.style.top = '0px';
-      container.style.width = layout === 'vertical' ? '320px' : '460px';
-      container.style.height = layout === 'vertical' ? '860px' : '580px';
-      container.style.transform = 'none';
-      container.style.transition = 'none';
-      
-      // Ensure the cloned photostrip itself is rendered at full 1:1 scale
-      clone.style.transform = 'none';
-      clone.style.transition = 'none';
-      clone.style.width = layout === 'vertical' ? '320px' : '460px';
-      clone.style.height = layout === 'vertical' ? '860px' : '580px';
-      
-      container.appendChild(clone);
-      document.body.appendChild(container);
-      
-      // Small pause to allow the browser to register offscreen layout and paint
+      // Small pause to allow the browser to settle
       await new Promise(resolve => setTimeout(resolve, 150));
       
       // Generate PNG using html-to-image at high resolution (pixelRatio: 3)
-      // This uses SVG foreignObject, rendering oklch colors, filters, writingMode vertical, and transforms natively
-      const dataUrl = await htmlToImage.toPng(clone, {
+      // We pass printRef.current directly to ensure all active base64 image data is loaded and decoded
+      const dataUrl = await htmlToImage.toPng(printRef.current, {
         pixelRatio: 3,
         style: {
           transform: 'none',
@@ -259,10 +235,6 @@ export default function EditorScreen({ photos, onRetake }) {
       console.error("Failed to generate photostrip image:", err);
       alert("Pemberitahuan: Terjadi kendala saat merender gambar. Silakan coba kembali atau gunakan tangkapan layar (screenshot).");
     } finally {
-      // Remove the off-screen container from DOM
-      if (container && container.parentNode) {
-        container.parentNode.removeChild(container);
-      }
       setIsExporting(false);
     }
   };
