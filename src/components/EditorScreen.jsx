@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import html2canvas from 'html2canvas-pro';
+import * as htmlToImage from 'html-to-image';
 import { Download, RefreshCw, Layers, Palette, Sliders, Type } from 'lucide-react';
 
 const THEMES = [
@@ -230,56 +230,34 @@ export default function EditorScreen({ photos, onRetake }) {
       // Small pause to allow the browser to register offscreen layout and paint
       await new Promise(resolve => setTimeout(resolve, 150));
       
-      let canvas;
-      try {
-        canvas = await html2canvas(clone, {
-          scale: 3, // High DPI
-          useCORS: true,
-          allowTaint: false, // Must be false to allow canvas.toDataURL() without SecurityError
-          logging: false,
-          backgroundColor: null,
-          width: layout === 'vertical' ? 320 : 460,
-          height: layout === 'vertical' ? 860 : 580,
-        });
-      } catch (scaleErr) {
-        console.warn("Failed capturing at scale 3, retrying at scale 2...", scaleErr);
-        canvas = await html2canvas(clone, {
-          scale: 2,
-          useCORS: true,
-          allowTaint: false,
-          logging: false,
-          backgroundColor: null,
-          width: layout === 'vertical' ? 320 : 460,
-          height: layout === 'vertical' ? 860 : 580,
-        });
-      }
-      
-      // Convert canvas to Blob asynchronously for massive reliability improvements on mobile Safari and Chrome
-      const blob = await new Promise((resolve, reject) => {
-        canvas.toBlob((b) => {
-          if (b) resolve(b);
-          else reject(new Error("Failed to generate image blob"));
-        }, 'image/png');
+      // Generate PNG using html-to-image at high resolution (pixelRatio: 3)
+      // This uses SVG foreignObject, rendering oklch colors, filters, writingMode vertical, and transforms natively
+      const dataUrl = await htmlToImage.toPng(clone, {
+        pixelRatio: 3,
+        style: {
+          transform: 'none',
+          left: '0',
+          top: '0',
+        },
+        width: layout === 'vertical' ? 320 : 460,
+        height: layout === 'vertical' ? 860 : 580,
+        cacheBust: true,
       });
       
-      const blobUrl = URL.createObjectURL(blob);
-      setExportedImage(blobUrl);
+      setExportedImage(dataUrl);
       
       // Attempt automatic download (works across desktop browsers)
       const link = document.createElement('a');
       link.download = `cipa-miniphotobox-${Date.now()}.png`;
-      link.href = blobUrl;
+      link.href = dataUrl;
       
       // Append to DOM for Safari / Firefox click trigger compatibility
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-      
-      // Clean up blob URL after 1 minute to release memory
-      setTimeout(() => URL.revokeObjectURL(blobUrl), 60000);
     } catch (err) {
       console.error("Failed to generate photostrip image:", err);
-      alert("Pemberitahuan: Terjadi kendala saat merender gambar resolusi tinggi. Silakan coba tekan kembali tombol download atau ambil tangkapan layar (screenshot) preview.");
+      alert("Pemberitahuan: Terjadi kendala saat merender gambar. Silakan coba kembali atau gunakan tangkapan layar (screenshot).");
     } finally {
       // Remove the off-screen container from DOM
       if (container && container.parentNode) {
