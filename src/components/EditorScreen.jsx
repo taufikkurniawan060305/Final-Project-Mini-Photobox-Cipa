@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import html2canvas from 'html2canvas';
+import html2canvas from 'html2canvas-pro';
 import { Download, RefreshCw, Layers, Palette, Sliders, Type } from 'lucide-react';
 
 const THEMES = [
@@ -181,10 +181,20 @@ export default function EditorScreen({ photos, onRetake }) {
   const [isExporting, setIsExporting] = useState(false);
   const [exportedImage, setExportedImage] = useState(null);
   const printRef = useRef(null);
+  const wrapperRef = useRef(null);
 
   const handleDownload = async () => {
     if (!printRef.current || isExporting) return;
     setIsExporting(true);
+    
+    // Temporarily reset scale to 1 to prevent html2canvas layout bugs and blurry/shifted text
+    const scalingWrapper = wrapperRef.current;
+    let originalTransform = '';
+    if (scalingWrapper) {
+      originalTransform = scalingWrapper.style.transform;
+      scalingWrapper.style.transform = 'scale(1)';
+      scalingWrapper.style.transition = 'none';
+    }
     
     try {
       // Ensure all custom Google fonts are fully loaded prior to capture
@@ -253,6 +263,11 @@ export default function EditorScreen({ photos, onRetake }) {
       console.error("Failed to generate photostrip image:", err);
       alert("Pemberitahuan: Terjadi kendala saat merender gambar resolusi tinggi. Silakan coba tekan kembali tombol download atau ambil tangkapan layar (screenshot) preview.");
     } finally {
+      // Restore scaling
+      if (scalingWrapper) {
+        scalingWrapper.style.transform = originalTransform;
+        scalingWrapper.style.transition = '';
+      }
       setIsExporting(false);
     }
   };
@@ -443,7 +458,9 @@ export default function EditorScreen({ photos, onRetake }) {
           <div className="w-full flex items-center justify-center overflow-auto py-4">
             
             {/* Visual Scaling Wrapper */}
-            <div className="origin-top transition-transform duration-300 scale-[0.55] sm:scale-[0.75] md:scale-90 lg:scale-[0.62] xl:scale-[0.85]"
+            <div 
+              ref={wrapperRef}
+              className="origin-top transition-transform duration-300 scale-[0.55] sm:scale-[0.75] md:scale-90 lg:scale-[0.62] xl:scale-[0.85]"
               style={{
                 height: layout === 'vertical' ? '860px' : '580px',
                 width: layout === 'vertical' ? '320px' : '460px'
